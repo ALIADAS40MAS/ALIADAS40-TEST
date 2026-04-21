@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico — ALIADAS 40+</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --lavanda: #BCA9D1;
+    --lavanda-light: #ede7f6;
+    --lavanda-dark: #8a6fb0;
+    --lavanda-deep: #5e4a82;
+    --salvia: #A8C3A0;
+    --salvia-light: #dceeda;
+    --neutro: #B5AA90;
+    --beige: #E6D3B3;
+    --beige-dark: #c9a96e;
+    --blanco: #faf8f5;
+    --gris: #7a7370;
+    --gris-oscuro: #3d3733;
+    --rojo-suave: #d4847a;
+    --rojo-light: #fce8e6;
+    --verde: #7aab72;
+    --verde-light: #dceeda;
+    --naranja: #e8a87c;
+    --naranja-light: #fdecd8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--blanco);
+    color: var(--gris-oscuro);
+    min-height: 100vh;
+  }
+
+  .progress-bar-outer {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 3px; background: rgba(188,169,209,0.2); z-index: 100;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--lavanda), var(--lavanda-dark));
+    transition: width 0.5s ease; width: 0%;
+  }
+
+  .screen { display: none; min-height: 100vh; padding: 64px 24px 80px; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+  .wrapper { max-width: 660px; width: 100%; margin: 0 auto; }
+
+  /* ── INTRO ── */
+  #screen-intro {
+    background: radial-gradient(ellipse at 60% 0%, #ede7f6 0%, var(--blanco) 65%);
+    justify-content: center;
+  }
+
+  .brand-pill {
+    display: inline-block;
+    font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--lavanda-dark); background: var(--lavanda-light);
+    padding: 5px 14px; border-radius: 20px; margin-bottom: 28px;
+  }
+
+  .intro-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 5vw, 50px); font-weight: 300;
+    color: var(--gris-oscuro); line-height: 1.15; margin-bottom: 18px;
+  }
+  .intro-title em { color: var(--lavanda-dark); font-style: italic; }
+
+  .intro-desc {
+    font-size: 16px; color: var(--gris); line-height: 1.75;
+    margin-bottom: 40px; max-width: 520px;
+  }
+
+  .name-block { margin-bottom: 36px; }
+  .name-label {
+    display: block; font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--gris); margin-bottom: 10px;
+  }
+  .name-input {
+    width: 100%; max-width: 360px;
+    padding: 14px 20px; border-radius: 50px;
+    border: 2px solid var(--beige); background: white;
+    font-family: 'Nunito', sans-serif; font-size: 16px; color: var(--gris-oscuro);
+    outline: none; transition: border-color 0.2s;
+  }
+  .name-input:focus { border-color: var(--lavanda); }
+  .name-input::placeholder { color: #bbb; }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--lavanda-dark); color: white;
+    border: none; padding: 16px 36px; border-radius: 50px;
+    font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 700;
+    cursor: pointer; transition: all 0.25s; letter-spacing: 0.3px;
+  }
+  .btn-primary:hover {
+    background: var(--lavanda-deep); transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(138,111,176,0.3);
+  }
+  .time-note { margin-top: 14px; font-size: 13px; color: var(--gris); }
+
+  /* ── QUIZ ── */
+  #screen-quiz { background: var(--blanco); }
+
+  .q-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .q-counter { font-size: 12px; color: var(--gris); font-weight: 600; letter-spacing: 1px; }
+  .q-dot-row { display: flex; gap: 5px; }
+  .q-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--beige); transition: background 0.3s;
+  }
+  .q-dot.done { background: var(--lavanda-dark); }
+  .q-dot.active { background: var(--lavanda); }
+
+  .q-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(22px, 3.5vw, 30px); font-weight: 400;
+    color: var(--gris-oscuro); line-height: 1.3; margin-bottom: 6px; margin-top: 28px;
+  }
+  .q-sub {
+    font-size: 14px; color: var(--gris); line-height: 1.6;
+    margin-bottom: 32px; font-style: italic;
+  }
+
+  .options-grid { display: flex; flex-direction: column; gap: 11px; width: 100%; }
+
+  .option-btn {
+    width: 100%; text-align: left; padding: 17px 20px;
+    border-radius: 14px; border: 2px solid #ebe5dd; background: white;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: flex-start; gap: 14px;
+    font-family: 'Nunito', sans-serif;
+  }
+  .option-btn:hover { border-color: var(--lavanda); background: var(--lavanda-light); transform: translateX(3px); }
+  .option-btn.selected { border-color: var(--lavanda-dark); background: var(--lavanda-light); }
+
+  .option-letter {
+    width: 26px; height: 26px; border-radius: 50%; background: var(--beige);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: var(--gris); flex-shrink: 0;
+    transition: all 0.2s; margin-top: 2px;
+  }
+  .option-btn.selected .option-letter { background: var(--lavanda-dark); color: white; }
+  .option-text { font-size: 15px; color: var(--gris-oscuro); line-height: 1.5; }
+
+  .quiz-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 32px; width: 100%;
+  }
+  .btn-back {
+    background: none; border: 2px solid var(--beige); color: var(--gris);
+    padding: 11px 22px; border-radius: 50px;
+    font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-back:hover { border-color: var(--neutro); color: var(--gris-oscuro); }
+  .btn-back:disabled { opacity: 0.25; cursor: default; }
+
+  .btn-next {
+    background: var(--lavanda-dark); color: white; border: none;
+    padding: 13px 30px; border-radius: 50px;
+    font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: all 0.25s; opacity: 0.35; pointer-events: none;
+  }
+  .btn-next.enabled { opacity: 1; pointer-events: all; }
+  .btn-next.enabled:hover {
+    background: var(--lavanda-deep); transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(138,111,176,0.3);
+  }
+
+  /* ── RESULTS ── */
+  #screen-results { padding-top: 48px; }
+
+  .results-hero { text-align: center; margin-bottom: 44px; }
+  .results-eyebrow {
+    font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--lavanda-dark); background: var(--lavanda-light);
+    padding: 5px 14px; border-radius: 20px;
+    display: inline-block; margin-bottom: 22px;
+  }
+  .results-greeting {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(14px, 2.5vw, 17px); font-weight: 400;
+    color: var(--gris); margin-bottom: 8px; font-style: italic;
+  }
+  .profile-name-big {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 6vw, 54px); font-weight: 600;
+    color: var(--gris-oscuro); line-height: 1.1; margin-bottom: 6px;
+  }
+  .profile-name-big em { color: var(--lavanda-dark); font-style: italic; }
+  .profile-tagline {
+    font-size: 15px; color: var(--gris); font-style: italic;
+    line-height: 1.5; max-width: 480px; margin: 0 auto;
+  }
+
+  .profile-card {
+    border-radius: 22px; padding: 36px 36px 32px;
+    margin-bottom: 28px; position: relative; overflow: hidden;
+  }
+  .profile-card::before {
+    content: attr(data-symbol);
+    position: absolute; right: 28px; top: 20px;
+    font-size: 90px; opacity: 0.07; line-height: 1;
+  }
+
+  .pc-what-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    color: rgba(255,255,255,0.5); margin-bottom: 10px;
+  }
+  .pc-what {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 400; color: white; line-height: 1.4;
+    margin-bottom: 20px; font-style: italic;
+  }
+  .pc-body { font-size: 15px; color: rgba(255,255,255,0.88); line-height: 1.75; }
+
+  .inner-voice {
+    background: white; border-radius: 16px; padding: 26px 30px;
+    margin-bottom: 24px; border-left: 4px solid var(--beige-dark);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+  }
+  .iv-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--gris); margin-bottom: 12px;
+  }
+  .iv-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(18px, 3vw, 22px); font-style: italic;
+    color: var(--gris-oscuro); line-height: 1.5;
+  }
+  .iv-quote::before { content: '"'; }
+  .iv-quote::after { content: '"'; }
+
+  .secondary-trait {
+    background: white; border-radius: 16px; padding: 22px 28px;
+    margin-bottom: 24px; box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+    border-left: 4px solid var(--neutro);
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .st-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+  .st-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--gris); margin-bottom: 6px;
+  }
+  .st-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px; font-weight: 600; color: var(--gris-oscuro); margin-bottom: 6px;
+  }
+  .st-body { font-size: 14px; color: var(--gris); line-height: 1.65; }
+
+  .whats-happening {
+    background: white; border-radius: 16px; padding: 26px 30px;
+    margin-bottom: 24px; box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+  }
+  .wh-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px; font-weight: 600; color: var(--gris-oscuro); margin-bottom: 16px;
+  }
+  .wh-list { list-style: none; display: flex; flex-direction: column; gap: 11px; }
+  .wh-list li {
+    display: flex; gap: 12px; align-items: flex-start;
+    font-size: 14px; color: var(--gris-oscuro); line-height: 1.6;
+  }
+  .wh-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--lavanda); flex-shrink: 0; margin-top: 6px;
+  }
+
+  .if-nothing {
+    background: linear-gradient(135deg, #fdf0ef, #fce8e6);
+    border-radius: 16px; padding: 26px 30px; margin-bottom: 24px;
+    border: 1px solid #f0c0bc;
+  }
+  .if-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px; font-weight: 600; color: #8a3030; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .if-body { font-size: 14px; color: #6a2828; line-height: 1.75; }
+
+  .soft-invitation {
+    background: linear-gradient(135deg, #f9f7fe, var(--lavanda-light));
+    border-radius: 16px; padding: 28px 30px; margin-bottom: 28px;
+    border: 1px solid rgba(188,169,209,0.3);
+  }
+  .si-eyebrow {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--lavanda-dark); margin-bottom: 12px;
+  }
+  .si-question {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(19px, 3vw, 23px); font-weight: 400;
+    color: var(--gris-oscuro); line-height: 1.45; margin-bottom: 16px;
+    font-style: italic;
+  }
+  .si-body { font-size: 14px; color: var(--gris); line-height: 1.7; }
+
+  /* ── CTA BLOCK ── */
+  .cta-block {
+    background: white; border-radius: 20px; padding: 32px 30px;
+    margin-bottom: 36px; box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+    border: 1px solid rgba(188,169,209,0.2);
+  }
+  .cta-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 21px; font-weight: 600; color: var(--gris-oscuro);
+    line-height: 1.35; margin-bottom: 14px;
+  }
+  .cta-body {
+    font-size: 14px; color: var(--gris); line-height: 1.75; margin-bottom: 20px;
+  }
+  .cta-microcopy {
+    font-size: 13px; color: var(--gris); margin-bottom: 14px;
+    font-style: italic; line-height: 1.6;
+  }
+  .btn-cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--lavanda-dark); color: white; border: none;
+    padding: 15px 34px; border-radius: 50px;
+    font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: all 0.25s; text-decoration: none;
+  }
+  .btn-cta:hover {
+    background: var(--lavanda-deep); transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(138,111,176,0.3);
+  }
+  .btn-cta-ig {
+    background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+  }
+  .btn-cta-ig:hover {
+    opacity: 0.9; transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(131,58,180,0.3);
+  }
+  .cta-no-pressure {
+    font-size: 12px; color: #bbb; margin-top: 12px;
+    font-style: italic; display: block;
+  }
+
+  .footer-note {
+    text-align: center; margin-top: 44px;
+    font-size: 11px; color: #ccc;
+    letter-spacing: 1.5px; text-transform: uppercase;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fu { animation: fadeUp 0.55s ease both; }
+  .d1 { animation-delay: 0.05s; } .d2 { animation-delay: 0.15s; }
+  .d3 { animation-delay: 0.25s; } .d4 { animation-delay: 0.35s; }
+  .d5 { animation-delay: 0.45s; } .d6 { animation-delay: 0.55s; }
+  .d7 { animation-delay: 0.65s; }
+
+  @media (max-width: 540px) {
+    .profile-card { padding: 28px 22px; }
+    .inner-voice, .whats-happening, .if-nothing, .soft-invitation, .cta-block { padding: 22px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar-outer">
+  <div class="progress-bar-inner" id="progressBar"></div>
+</div>
+
+<!-- ═══ INTRO ═══ -->
+<div class="screen active" id="screen-intro">
+  <div class="wrapper">
+    <div class="brand-pill">ALIADAS 40+ · Diagnóstico</div>
+    <h1 class="intro-title">¿Cómo estás <em>de verdad</em>?<br>No la respuesta automática.</h1>
+    <p class="intro-desc">Respondé con honestidad. No hay respuestas correctas ni incorrectas. Al final vas a ver un retrato de dónde estás hoy — y qué podría estar pasando debajo de la superficie.</p>
+    <div class="name-block">
+      <label class="name-label" for="nameInput">Tu nombre</label>
+      <input class="name-input" id="nameInput" type="text" placeholder="¿Cómo te llamás?" autocomplete="off" />
+    </div>
+    <button class="btn-primary" onclick="startQuiz()">Comenzar →</button>
+    <p class="time-note">⏱ 12 preguntas · menos de 5 minutos</p>
+  </div>
+</div>
+
+<!-- ═══ QUIZ ═══ -->
+<div class="screen" id="screen-quiz">
+  <div class="wrapper">
+    <div class="q-meta">
+      <div class="q-dot-row" id="dotRow"></div>
+      <span class="q-counter" id="qCounter">1 / 12</span>
+    </div>
+    <h2 class="q-text" id="qText"></h2>
+    <p class="q-sub" id="qSub"></p>
+    <div class="options-grid" id="optionsGrid"></div>
+    <div class="quiz-nav">
+      <button class="btn-back" id="btnBack" onclick="prevQuestion()" disabled>← Anterior</button>
+      <button class="btn-next" id="btnNext" onclick="nextQuestion()">Siguiente →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ RESULTS ═══ -->
+<div class="screen" id="screen-results">
+  <div class="wrapper">
+    <div class="results-hero fu d1">
+      <div class="results-eyebrow">Tu diagnóstico</div>
+      <p class="results-greeting" id="resultsGreeting"></p>
+      <h1 class="profile-name-big" id="profileNameBig"></h1>
+      <p class="profile-tagline" id="profileTagline"></p>
+    </div>
+    <div class="profile-card fu d2" id="profileCard"></div>
+    <div class="inner-voice fu d3" id="innerVoice"></div>
+    <div id="secondaryTrait"></div>
+    <div class="whats-happening fu d4" id="whatsHappening"></div>
+    <div class="if-nothing fu d5" id="ifNothing"></div>
+    <div class="soft-invitation fu d6" id="softInvitation"></div>
+    <div id="ctaBlock" class="fu d7"></div>
+    <p class="footer-note">ALIADAS 40+ · @aliadasmas40 · Diagnóstico confidencial</p>
+  </div>
+</div>
+
+<script>
+const WA_LINK = 'https://wa.me/56996191549';
+
+const questions = [
+  {
+    text: '¿Qué pasa cuando terminás el día y no lograste todo lo que tenías planeado?',
+    sub: 'La respuesta real, no la que te gustaría dar.',
+    options: [
+      { text: 'Repaso mentalmente todo lo que quedó sin hacer y me cuesta soltar.', scores: {a:3,b:1,c:0} },
+      { text: 'Siento que fallé, aunque sé que hice mucho.', scores: {a:2,b:3,c:0} },
+      { text: 'Me frustra, pero me digo que mañana es otro día.', scores: {a:1,b:1,c:2} },
+      { text: 'Lo acepto — no todo puede hacerse en un día.', scores: {a:0,b:0,c:3} }
+    ]
+  },
+  {
+    text: '¿Cuándo fue la última vez que hiciste algo solo porque te daba placer, sin ningún propósito productivo?',
+    sub: 'Algo que no tenía output, resultado ni utilidad.',
+    options: [
+      { text: 'No lo recuerdo. No tengo tiempo para eso.', scores: {a:3,b:2,c:0} },
+      { text: 'Hago cosas "para mí" pero siempre las justifico como necesarias.', scores: {a:2,b:1,c:1} },
+      { text: 'A veces, pero me queda la sensación de que debería estar haciendo otra cosa.', scores: {a:1,b:2,c:1} },
+      { text: 'Tengo momentos genuinos para mí y los disfruto sin culpa.', scores: {a:0,b:0,c:3} }
+    ]
+  },
+  {
+    text: 'Cuando alguien te pregunta "¿cómo estás?" — ¿qué respondés?',
+    sub: 'Automáticamente, sin pensarlo.',
+    options: [
+      { text: '"Bien, a full" — y paso a otra cosa.', scores: {a:3,b:1,c:0} },
+      { text: '"Bien" aunque no esté bien. No quiero cargar a nadie.', scores: {a:1,b:3,c:0} },
+      { text: 'Depende de quién pregunta. Con algunos soy honesta.', scores: {a:1,b:1,c:2} },
+      { text: 'Digo lo que realmente siento, sin dramatismo.', scores: {a:0,b:0,c:3} }
+    ]
+  },
+  {
+    text: '¿Cómo describirías tu relación con tu cuerpo en este momento?',
+    sub: 'Lo que sentís, no lo que creés que deberías sentir.',
+    options: [
+      { text: 'Es una herramienta que tiene que funcionar. Me molesta cuando falla.', scores: {a:3,b:1,c:0} },
+      { text: 'Lo descuido bastante — no tengo energía para ocuparme de mí.', scores: {a:1,b:3,c:0} },
+      { text: 'Tenemos una relación complicada — hay cosas que no entiendo de lo que está pasando.', scores: {a:2,b:2,c:1} },
+      { text: 'Escucho las señales que me manda, aunque no siempre sé qué hacer con ellas.', scores: {a:0,b:1,c:3} }
+    ]
+  },
+  {
+    text: 'Si mirás tu vida hoy en distintas áreas — trabajo, cuerpo, vínculos, tiempo para vos — ¿cómo la describirías?',
+    sub: 'No como debería estar. Como realmente está.',
+    options: [
+      { text: 'En algunas cosas me va bien, pero en otras siento que algo falta — y no siempre sé qué.', scores: {a:2,b:1,c:2} },
+      { text: 'Funciona para todos los demás. Para mí, no tanto.', scores: {a:1,b:3,c:0} },
+      { text: 'Va rápido, va llena — pero no sé si va hacia donde yo quiero.', scores: {a:3,b:1,c:0} },
+      { text: 'Estoy en un proceso real de ajuste. No es perfecto pero es mío.', scores: {a:0,b:0,c:3} }
+    ]
+  },
+  {
+    text: '¿Cómo te sentís con el tiempo libre?',
+    sub: 'Ese espacio sin agenda, sin obligaciones.',
+    options: [
+      { text: 'Incómoda. No saber qué hacer me genera ansiedad.', scores: {a:3,b:1,c:0} },
+      { text: 'Lo necesito desesperadamente pero no sé cómo disfrutarlo.', scores: {a:1,b:3,c:0} },
+      { text: 'A veces lo disfruto, a veces aparece la culpa.', scores: {a:2,b:2,c:1} },
+      { text: 'Es un recurso que cuido y recarga.', scores: {a:0,b:0,c:3} }
+    ]
+  },
+  {
+    text: '¿Quién sos cuando no estás siendo madre, profesional, hija o pareja?',
+    sub: 'Sin ninguno de esos roles puestos.',
+    options: [
+      { text: 'No lo sé. Nunca me lo había preguntado así.', scores: {a:2,b:2,c:0} },
+      { text: 'Soy alguien que se fue perdiendo en el camino.', scores: {a:1,b:3,c:0} },
+      { text: 'Tengo una idea, pero está muy en el fondo.', scores: {a:2,b:1,c:2} },
+      { text: 'Lo sé. Hay una versión mía que existe más allá de los roles.', scores: {a:0,b:0,c:3} }
+    ]
+  },
+  {
+    text: '¿Cuál de estas frases te suena más familiar?',
+    sub: 'La que aparece más seguido en tu cabeza.',
+    options: [
+      { text: '"Si no lo hago yo, no lo hace nadie."', scores: {a:3,b:1,c:0} },
+      { text: '"¿Para qué tanto esfuerzo si nada cambia?"', scores: {a:0,b:3,c:0} },
+      { text: '"Algo tiene que cambiar, pero no sé por dónde empezar."', scores: {a:1,b:2,c:2} },
+      { text: '"Estoy en proceso — no todo tiene que ser perfecto ahora."', scores: {a:0,b:0,c:3} }
+    ]
+  },
+  {
+    text: 'Cuando aparece algo en tu cuerpo que no estaba antes — cansancio distinto, un kilo más, el sueño cambiado — ¿qué pasa por tu cabeza?',
+    sub: 'El primer pensamiento, antes de razonarlo.',
+    options: [
+      { text: '"Es el ritmo que llevo. Ya se va a acomodar."', scores: {a:3,b:1,c:0} },
+      { text: '"Sé que tendría que hacer algo, pero no tengo cabeza para esto ahora."', scores: {a:2,b:3,c:0} },
+      { text: '"Algo está pasando. No sé qué, pero lo noto."', scores: {a:1,b:2,c:2} },
+      { text: '"Presto atención. El cuerpo siempre dice algo."', scores: {a:0,b:0,c:3} }
+    ]
+  },
+  {
+    text: 'Pensá en la última vez que tuviste un rato sin obligaciones. ¿Qué pasó?',
+    sub: 'Un sábado a la tarde, un hueco inesperado — lo que sea que recuerdes.',
+    options: [
+      { text: 'Quería aprovecharlo pero la lista de pendientes no me dejó soltar.', scores: {a:3,b:1,c:0} },
+      { text: 'Quería hacerlo pero no encontré el momento — siempre había algo antes.', scores: {a:2,b:2,c:0} },
+      { text: 'Estuve, pero con la cabeza en otra parte. El cuerpo paró, la mente no.', scores: {a:2,b:2,c:1} },
+      { text: 'Lo disfruté. Esos momentos me recargan de verdad.', scores: {a:0,b:0,c:3} }
+    ]
+  },
+  {
+    text: '¿Hay algo que querés cambiar en tu vida pero que "todavía no es el momento"?',
+    sub: 'Algo que postergás sin fecha.',
+    options: [
+      { text: 'Sí, varias cosas — pero primero tengo que resolver otras cosas más urgentes.', scores: {a:3,b:1,c:0} },
+      { text: 'Sí, pero ya no creo que el momento llegue.', scores: {a:0,b:3,c:0} },
+      { text: 'Sí. Y últimamente siento que se me acaba el tiempo de postergarlo.', scores: {a:1,b:2,c:2} },
+      { text: 'Estoy en eso. No es fácil pero estoy en movimiento.', scores: {a:0,b:0,c:3} }
+    ]
+  },
+  {
+    text: 'Si tu cuerpo pudiera hablarte esta semana, ¿qué creés que te diría?',
+    sub: 'La respuesta que no querés escuchar.',
+    options: [
+      { text: '"Basta. Ya no doy más."', scores: {a:3,b:2,c:0} },
+      { text: '"Hace tiempo que no me prestás atención."', scores: {a:1,b:3,c:0} },
+      { text: '"Necesitamos hablar."', scores: {a:2,b:2,c:1} },
+      { text: '"Vamos bien, pero no te descuides."', scores: {a:0,b:0,c:3} }
+    ]
+  }
+];
+
+const profiles = {
+  a: {
+    name: 'The Unstoppable',
+    tagline: 'Construiste un sistema que funcionó durante años. Lo que está cambiando es que el sistema ya no te alcanza.',
+    cardBg: 'linear-gradient(135deg, #7a5fa0, #5e4a82)',
+    cardSymbol: '◆',
+    cardWhat: 'Sos la que sostiene todo. La que cumple, entrega, produce. La que encontró una forma de funcionar que durante años le dio resultados — y que hoy empieza a mostrar sus límites de maneras que no terminás de explicar.',
+    cardBody: 'No te cuestionás la voluntad ni la capacidad — de eso te sobra. Lo que te genera perplejidad es que estás haciendo lo mismo de siempre y el cuadro ya no cierra. Y eso, para alguien como vos, es desconcertante.',
+    voiceQuote: 'Algo está fallando y no sé dónde. Antes esto no me pasaba.',
+    happening: [
+      'Hay una brecha creciente entre el esfuerzo que invertís y los resultados que obtenés — en energía, en recuperación, en rendimiento.',
+      'Tu mente no encuentra el interruptor de pausa — trabaja incluso cuando el cuerpo ya no acompaña.',
+      'El tiempo sin estructura te genera incomodidad en lugar de alivio.',
+      'Los sofocos, los cambios en el peso, la irritabilidad, el sueño alterado — los síntomas están. Pero la perimenopausia es algo que le pasa a otras, no a vos. Todavía no. O eso es lo que te decís. No es negación consciente: es que esa etapa no forma parte de la imagen que tenés de vos misma, y mientras eso no cambie, los síntomas siguen sin tener explicación.',
+      'Lo que está cambiando en tu cuerpo tiene una lógica biológica precisa. Y comprenderla cambia completamente cómo abordás lo que estás viviendo.'
+    ],
+    ifNothing: 'El cuerpo no aguarda a que sea el momento oportuno. Mientras esos episodios se tratan como circunstancias aisladas, el proceso avanza sin atención. Lo que hoy tiene solución con la información y el acompañamiento adecuados, con el tiempo demanda mucho más. La diferencia entre actuar ahora y actuar después no es menor.',
+    invitationQ: '¿Y si lo que estás viviendo no es un problema de gestión ni de ritmo — sino información sobre tu biología que nunca tuviste ordenada?',
+    invitationBody: 'Eso se aborda con una explicación profunda de lo que está ocurriendo en tu biología, tus hábitos y la forma en que venís funcionando. Hay un camino para hacerlo sin alterar todo lo que construiste.',
+    cta: {
+      title: 'Hay aspectos de lo que está ocurriendo que posiblemente aún no hayas tenido oportunidad de dimensionar del todo.',
+      body: 'Lo que tu cuerpo está mostrando tiene una lógica. Hay una explicación biológica y de hábitos que da cuenta de lo que estás viviendo — y que muy pocas mujeres en tu posición conocen antes de que se vuelva urgente atenderlo.',
+      microcopy: 'Empezá por ahí. Con información específica, sin compromisos.',
+      btn: 'Quiero recibir más información →',
+      btnLink: WA_LINK,
+      btnClass: 'btn-cta',
+      subtext: 'Contenido preciso para lo que estás viviendo en esta etapa.'
+    }
+  },
+  b: {
+    name: 'The Invisible',
+    tagline: 'Dás en todos los frentes — al trabajo, a los tuyos, a vos misma — y aun así sentís que nunca alcanza.',
+    cardBg: 'linear-gradient(135deg, #b08060, #8a5a3a)',
+    cardSymbol: '○',
+    cardWhat: 'No es que hayas dejado de estar presente en tu propia vida. Es que operás en múltiples frentes al mismo tiempo — con la misma dedicación en cada uno — y llegaste a un punto en que el sistema ya no tiene margen disponible.',
+    cardBody: 'Seguís funcionando. Cumplís. Pero hay una distancia cada vez más notoria entre lo que hacés y cómo te sentís haciéndolo. Y eso tiene un peso que no se explica solamente con la agenda.',
+    voiceQuote: 'Hago todo lo que se supone que tengo que hacer. ¿Por qué me siento así?',
+    happening: [
+      'La fatiga que sentís no es consecuencia de poco esfuerzo — de eso ponés de sobra. Es el resultado de sostener simultáneamente una cantidad de demandas que, sumadas, superan lo que cualquier sistema puede procesar sin pausa.',
+      'No es que no te des tiempo: es que cuando intentás hacerlo, no encontrás la manera de recargar de verdad.',
+      'Tu cuerpo está procesando una carga que va mucho más allá de lo que aparece en la agenda.',
+      'Hay cambios que observás — en el cuerpo, en el humor, en el sueño, en la energía — que no terminás de conectar porque nadie te ofreció la explicación que los integre en un cuadro coherente.',
+      'La certeza de que algo tiene que cambiar está. Lo que falta es claridad sobre por dónde, sin que todo lo demás se desordene.'
+    ],
+    ifNothing: 'Un cuerpo que procesa tanta demanda simultánea — física, mental, hormonal — sin que nadie haya ordenado el cuadro completo, llega a un punto de quiebre. No porque algo esté mal con vos. Sino porque ningún sistema, por robusto que sea, opera indefinidamente sin la información que necesita para sostenerse.',
+    invitationQ: '¿Cuánto tiempo más podés sostener este nivel de demanda antes de que el cuerpo establezca sus propios límites?',
+    invitationBody: '',
+    cta: {
+      title: 'Lo que estás viviendo tiene una explicación — y hay mujeres que están atravesando exactamente lo mismo.',
+      body: 'Sostener simultáneamente tanto y en tantos frentes tiene consecuencias que van más allá del cansancio. Eso se puede comprender. Y se puede abordar.',
+      microcopy: 'Seguinos para contenido que nombra con precisión lo que estás atravesando.',
+      btn: 'Seguir a @aliadasmas40 →',
+      btnLink: 'https://instagram.com/aliadasmas40',
+      btnClass: 'btn-cta btn-cta-ig',
+      subtext: 'Información que te ayuda a comprender qué está pasando y por dónde empezar.'
+    }
+  },
+  c: {
+    name: 'The Awakened',
+    tagline: 'Algo está cambiando — y una parte de vos ya comprendió por dónde pasa.',
+    cardBg: 'linear-gradient(135deg, #6a9e6a, #4a7a4a)',
+    cardSymbol: '✦',
+    cardWhat: 'Algo se fue moviendo — en tu cuerpo, en tu energía, en lo que tolerás y en lo que ya no — y eso te llevó a prestar atención de una manera distinta.',
+    cardBody: 'No siempre tenés el lenguaje para nombrarlo con precisión. Pero sabés que lo que está pasando no se resuelve con más esfuerzo ni con información suelta. Necesita orden, contención y una explicación profunda de lo que está ocurriendo.',
+    voiceQuote: 'Sé que hay algo más. Y cada vez me cuesta más ignorarlo.',
+    happening: [
+      'Estás en una transición real — y las transiciones bien acompañadas se convierten en transformaciones concretas.',
+      'Tenés capacidad de autoobservación que la mayoría desarrolla mucho más tarde, o nunca.',
+      'Lo que falta no es motivación ni información — es estructura y acompañamiento que integre lo que ya sabés y le dé continuidad y profundidad.',
+      'Tu cuerpo está atravesando un momento hormonal y biológico específico que tiene nombre, tiene lógica y merece atención especializada e integral — no respuestas aisladas.',
+      'La pregunta ya no es si algo tiene que cambiar — es cómo hacerlo con la profundidad y el sostén que este momento merece.'
+    ],
+    ifNothing: 'El riesgo es el mismo que en cualquier proceso que avanza sin atención: lo que hoy es manejable se vuelve urgente. La diferencia es que vos ya lo estás viendo — y eso es exactamente lo que hace que este sea el momento. La claridad que tenés hoy vale la pena honrarla con acción concreta, antes de que los ciclos se repitan y el margen se achique.',
+    invitationQ: '¿Qué sería diferente en tu vida si en tres meses tuvieras una explicación real e integrada de lo que está ocurriendo — en tu cuerpo, en tus hábitos y en tu biología — en lugar de seguir respondiendo síntoma por síntoma?',
+    invitationBody: '',
+    cta: {
+      title: 'Existe un proceso diseñado para este momento. La pregunta es si tiene sentido para vos.',
+      body: 'GAME SHIFT es un programa de tres meses que trabaja en simultáneo el cuerpo, los hábitos y los factores que sostienen lo que estás viviendo — con acompañamiento continuo y una mirada de salud integral. No es un programa genérico. Es un proceso estructurado para mujeres que, como vos, ya comprenden que algo tiene que cambiar y quieren hacerlo con información precisa y acompañamiento de calidad.',
+      microcopy: 'Si al leer esto sentís que necesitás una mirada profesional sobre tu situación actual, podés solicitar una conversación exploratoria.',
+      btn: 'Quiero explorar si esto es para mí →',
+      btnLink: WA_LINK,
+      btnClass: 'btn-cta',
+      subtext: 'Sin ningún tipo de compromiso. Con toda la información sobre la mesa para que puedas decidir con claridad.'
+    }
+  }
+};
+
+const secondaryTraits = {
+  a: {
+    icon: '⚡',
+    name: 'The Unstoppable',
+    body: 'También aparece en vos el patrón de quien construyó su identidad alrededor de la productividad constante. Esa parte que no puede parar sin sentir que algo se pierde.'
+  },
+  b: {
+    icon: '🌫',
+    name: 'The Invisible',
+    body: 'También hay en vos una parte que se fue diluyendo en el cuidado de los demás. Alguien que sabe lo que necesitan todos — menos ella misma.'
+  },
+  c: {
+    icon: '✦',
+    name: 'The Awakened',
+    body: 'También hay en vos una parte que ya despertó — que sabe que algo tiene que cambiar y está buscando, aunque todavía no tiene el camino claro.'
+  }
+};
+
+let answers = new Array(questions.length).fill(null);
+let currentQ = 0;
+let userName = '';
+
+function startQuiz() {
+  userName = (document.getElementById('nameInput').value || '').trim();
+  if (!userName) userName = 'Hola';
+  showScreen('screen-quiz');
+  renderQuestion(0);
+  updateProgress();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function buildDots() {
+  const row = document.getElementById('dotRow');
+  row.innerHTML = '';
+  questions.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'q-dot' + (i < currentQ ? ' done' : i === currentQ ? ' active' : '');
+    row.appendChild(d);
+  });
+}
+
+function renderQuestion(idx) {
+  const q = questions[idx];
+  document.getElementById('qCounter').textContent = `${idx + 1} / ${questions.length}`;
+  document.getElementById('qText').textContent = q.text;
+  document.getElementById('qSub').textContent = q.sub;
+  buildDots();
+
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn' + (answers[idx] === i ? ' selected' : '');
+    btn.innerHTML = `<div class="option-letter">${letters[i]}</div><div class="option-text">${opt.text}</div>`;
+    btn.onclick = () => selectOption(idx, i);
+    grid.appendChild(btn);
+  });
+
+  document.getElementById('btnBack').disabled = idx === 0;
+  document.getElementById('btnNext').textContent = idx === questions.length - 1 ? 'Ver mi resultado →' : 'Siguiente →';
+  updateNextBtn();
+}
+
+function selectOption(qIdx, optIdx) {
+  answers[qIdx] = optIdx;
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.toggle('selected', i === optIdx);
+  });
+  updateNextBtn();
+}
+
+function updateNextBtn() {
+  document.getElementById('btnNext').classList.toggle('enabled', answers[currentQ] !== null);
+}
+
+function nextQuestion() {
+  if (answers[currentQ] === null) return;
+  if (currentQ < questions.length - 1) {
+    currentQ++;
+    renderQuestion(currentQ);
+    updateProgress();
+  } else {
+    showResults();
+  }
+}
+
+function prevQuestion() {
+  if (currentQ > 0) {
+    currentQ--;
+    renderQuestion(currentQ);
+    updateProgress();
+  }
+}
+
+function updateProgress() {
+  document.getElementById('progressBar').style.width = (currentQ / questions.length * 100) + '%';
+}
+
+function showResults() {
+  document.getElementById('progressBar').style.width = '100%';
+
+  const totals = { a: 0, b: 0, c: 0 };
+  questions.forEach((q, i) => {
+    if (answers[i] !== null) {
+      const s = q.options[answers[i]].scores;
+      totals.a += s.a; totals.b += s.b; totals.c += s.c;
+    }
+  });
+
+  const sorted = Object.keys(totals).sort((x, y) => totals[y] - totals[x]);
+  const profileKey = sorted[0];
+  const secondKey = sorted[1];
+  const profile = profiles[profileKey];
+  const showSecondary = (totals[profileKey] - totals[secondKey]) <= 5;
+
+  showScreen('screen-results');
+
+  const first = userName.split(' ')[0];
+  document.getElementById('resultsGreeting').textContent = `${first}, esto es lo que encontramos.`;
+  document.getElementById('profileNameBig').innerHTML = `<em>${profile.name}</em>`;
+  document.getElementById('profileTagline').textContent = profile.tagline;
+
+  const card = document.getElementById('profileCard');
+  card.style.background = profile.cardBg;
+  card.setAttribute('data-symbol', profile.cardSymbol);
+  card.innerHTML = `
+    <div class="pc-what-label">Quién sos en este momento</div>
+    <div class="pc-what">${profile.cardWhat}</div>
+    <div class="pc-body">${profile.cardBody}</div>`;
+
+  document.getElementById('innerVoice').innerHTML = `
+    <div class="iv-label">La voz interna que más aparece</div>
+    <div class="iv-quote">${profile.voiceQuote}</div>`;
+
+  const stEl = document.getElementById('secondaryTrait');
+  if (showSecondary) {
+    const st = secondaryTraits[secondKey];
+    stEl.className = 'secondary-trait fu d3';
+    stEl.innerHTML = `
+      <div class="st-icon">${st.icon}</div>
+      <div>
+        <div class="st-label">También hay algo de</div>
+        <div class="st-name">${st.name}</div>
+        <div class="st-body">${st.body}</div>
+      </div>`;
+  } else {
+    stEl.innerHTML = '';
+  }
+
+  const items = profile.happening.map(h => `<li><div class="wh-dot"></div><span>${h}</span></li>`).join('');
+  document.getElementById('whatsHappening').innerHTML = `
+    <div class="wh-title">Lo que probablemente está pasando</div>
+    <ul class="wh-list">${items}</ul>`;
+
+  document.getElementById('ifNothing').innerHTML = `
+    <div class="if-title">⚠ Si nada cambia</div>
+    <div class="if-body">${profile.ifNothing}</div>`;
+
+  const invBody = profile.invitationBody ? `<div class="si-body">${profile.invitationBody}</div>` : '';
+  document.getElementById('softInvitation').innerHTML = `
+    <div class="si-eyebrow">Una pregunta para llevarte</div>
+    <div class="si-question">${profile.invitationQ}</div>
+    ${invBody}`;
+
+  const cta = profile.cta;
+  document.getElementById('ctaBlock').innerHTML = `
+    <div class="cta-block">
+      <div class="cta-title">${cta.title}</div>
+      <div class="cta-body">${cta.body}</div>
+      <div class="cta-microcopy">${cta.microcopy}</div>
+      <a href="${cta.btnLink}" target="_blank" class="${cta.btnClass}">${cta.btn}</a>
+      <span class="cta-no-pressure">${cta.subtext}</span>
+    </div>`;
+}
+</script>
+</body>
+</html>
